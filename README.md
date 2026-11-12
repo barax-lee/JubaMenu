@@ -1,4 +1,4 @@
-﻿# JubaMenu
+# JubaMenu
 
 A digital menu and table-ordering platform in development for restaurants, lounges, cafes and hotels in Juba, South Sudan. One application is designed to serve multiple restaurants with separate menus, tables, staff and payment records.
 
@@ -16,7 +16,7 @@ Implemented:
 - Supabase migration covering tenant relationships, RLS, transactional ordering, Storage policies and database-backed rate limiting.
 - Owner-only image upload endpoint with file size, MIME type and signature checks.
 
-Backend code and SQL still require live Supabase integration and security verification. The menu currently supports browsing, not cart checkout.
+Backend code and SQL still require live Supabase integration and security verification. Table menus now support saved carts, checkout, safe retries, order tracking and bill requests.
 
 ## Run locally
 
@@ -50,7 +50,7 @@ Use the same hostname configured in `NEXT_PUBLIC_APP_URL`; mutation endpoints en
 - [Freedom Lounge, Table 1](http://127.0.0.1:3000/r/freedom-lounge/t/demo-freedom-lounge-table-1-qr)
 - [Lee Bar, Table 1](http://127.0.0.1:3000/r/lee-bar/t/demo-lee-bar-table-1-qr)
 
-Restaurant cards on the homepage open their respective menus. Table routes identify the table; checkout controls are not yet implemented. Demo prices are illustrative. The current demo uses SSP for Freedom Lounge and USD for Lee Bar.
+Restaurant cards on the homepage open their respective menus. Table routes identify the table; use the table links above to add items and submit an order. Demo prices are illustrative. The current demo uses SSP for Freedom Lounge and USD for Lee Bar.
 
 ## Environment variables
 
@@ -92,8 +92,8 @@ Latest development checks:
 - TypeScript checking passed using `npx tsc --noEmit --incremental false`.
 - ESLint passed with one existing anonymous-default-export warning in `postcss.config.mjs`.
 - Both restaurant menu routes returned HTTP 200 in local demo mode.
-- Vitest previously reported no test files. Automated unit, browser and database security suites are still to be written.
-- Production build and live Supabase integration have not been verified.
+- Two Playwright ordering tests passed in local demo mode using Microsoft Edge: cart persistence, restaurant isolation, lost-response recovery, tracking, bill requests and sold-out controls. Unit and database security suites remain unfinished.
+- Production build passed. Live Supabase integration has not been verified.
 
 ## Project structure
 
@@ -107,7 +107,7 @@ supabase/migrations/     Database schema, policies and functions
 
 ## Remaining work
 
-- Persistent, table-scoped cart, checkout, customer tracking page and bill-request interface.
+- Complete and verify the staff-side service journey for customer orders.
 - Staff login, logout, password reset, protected dashboards and live order updates.
 - Owner screens for menu, table, settings and staff management.
 - QR generation, downloads, printable table cards and token rotation confirmation.
@@ -119,3 +119,7 @@ supabase/migrations/     Database schema, policies and functions
 - Confirm permissions for demonstration photography before commercial use.
 
 See [docs/roadmap.md](docs/roadmap.md) for the implementation checklist. Online payments, automated subscription billing, delivery, inventory and customer accounts are outside the current MVP scope.
+
+### Ordering browser tests
+
+Start the local demo server first, then run `npm run test:e2e`. Install Chromium with `npx playwright install chromium` if needed. To use an installed Edge browser in PowerShell, set `$env:PLAYWRIGHT_CHANNEL = 'msedge'` before running the tests. Browser tests create sample orders and bill requests in local demo storage.
