@@ -9,5 +9,18 @@
 }
 .food-image.is-loaded { opacity: 1; transform: scale(1); }
 .menu-hero .food-image.is-loaded { opacity: .45; }
+@media (hover: hover) and (pointer: fine) {
+  .card:hover .food-image.is-loaded,
+  .hero-image:hover .food-image.is-loaded { transform: scale(1.045); }
+}
+.card:focus-visible .food-image.is-loaded { transform: scale(1.045); }
+@media (prefers-reduced-motion: reduce) {
+  .food-image,
+  .card:hover .food-image.is-loaded,
+  .card:focus-visible .food-image.is-loaded,
+  .hero-image:hover .food-image.is-loaded {
+    transform: none;
+    transition: none !important;
+  }
+}
 
-@media (prefers-reduced-motion: reduce) { .food-image { transform: none; transition: none !important; } }
