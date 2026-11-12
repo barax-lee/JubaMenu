@@ -1,0 +1,43 @@
+﻿import { expect, test } from '@playwright/test';
+const base = 'http://127.0.0.1:3000';
+const table = '/r/freedom-lounge/t/demo-freedom-lounge-table-1-qr';
+test('table cart persists, survives lost confirmation, and tracks one order', async ({ page }) => {
+  await page.goto(base + table);
+  await page.getByRole('button', { name: 'Add Grilled Nile fish to cart', exact: true }).click();
+  await page.getByLabel('Instructions for Grilled Nile fish').fill('No chilli please');
+  await page.getByLabel('Instructions for the whole order').fill('Bring water first');
+  await page.reload();
+  await expect(page.getByLabel('Instructions for Grilled Nile fish')).toHaveValue('No chilli please');
+  await page.goto(base + '/r/lee-bar/t/demo-lee-bar-table-1-qr');
+  await expect(page.getByText('Choose something delicious from the menu.')).toBeVisible();
+  await page.goto(base + table);
+  let firstKey = '';
+  let firstToken = '';
+  await page.route('**/api/orders', async route => {
+    firstKey = route.request().postDataJSON().idempotency_key;
+    const response = await route.fetch();
+    expect(response.ok()).toBeTruthy();
+    firstToken = (await response.json()).token;
+    await route.abort('failed');
+  }, { times: 1 });
+  await page.getByRole('button', { name: 'Place order', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Retry same order safely' })).toBeEnabled();
+  await page.reload();
+  const requestPromise = page.waitForRequest(r => r.url().endsWith('/api/orders'));
+  await page.getByRole('button', { name: 'Retry same order safely' }).click();
+  expect((await requestPromise).postDataJSON().idempotency_key).toBe(firstKey);
+  await expect(page).toHaveURL(base + '/order/' + firstToken);
+  await expect(page.getByText('No chilli please')).toBeVisible();
+  await expect(page.getByText('Order instructions: Bring water first')).toBeVisible();
+  await page.getByRole('button', { name: 'Request the bill', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Bill requested' })).toBeDisabled();
+  await page.goto(base + table);
+  await expect(page.getByText('Choose something delicious from the menu.')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'View your last order' })).toHaveAttribute('href', '/order/' + firstToken);
+});
+test('browse-only menu has no checkout and sold-out dishes cannot be added', async ({ page }) => {
+  await page.goto(base + '/r/freedom-lounge');
+  await expect(page.getByRole('button', { name: 'Place order', exact: true })).toHaveCount(0);
+  await page.goto(base + table);
+  await expect(page.getByRole('button', { name: 'Add Garden salad to cart', exact: true })).toBeDisabled();
+});
