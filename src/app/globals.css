@@ -46,3 +46,7 @@
 @media (prefers-reduced-motion: reduce) {
   .food-image.is-loaded { animation: none !important; transform: none; }
 }
+
+/* Keep table ordering close to the menu, with comfortable room on phones. */
+main > .cart { max-width: 700px; margin: 24px auto 60px; position: static; }
+@media (max-width: 760px) { main > .cart { margin: 20px 18px 40px; } }
