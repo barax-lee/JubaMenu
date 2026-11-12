@@ -24,3 +24,25 @@
   }
 }
 
+/* Slow, alternating movement keeps photography lively without abrupt loops. */
+@keyframes photo-drift {
+  0% { transform: scale(1.055) translate(-.7%, -.4%); }
+  50% { transform: scale(1.11) translate(.7%, .5%); }
+  100% { transform: scale(1.07) translate(-.3%, .7%); }
+}
+.food-image.is-loaded {
+  animation: photo-drift 16s ease-in-out infinite alternate;
+}
+.hero-image .food-image.is-loaded { animation-duration: 22s; }
+.card:nth-child(even) .food-image.is-loaded {
+  animation-direction: alternate-reverse;
+  animation-duration: 19s;
+}
+@media (hover: hover) and (pointer: fine) {
+  .card:hover .food-image.is-loaded,
+  .hero-image:hover .food-image.is-loaded { animation-play-state: paused; }
+}
+.card:focus-visible .food-image.is-loaded { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .food-image.is-loaded { animation: none !important; transform: none; }
+}
